@@ -20,9 +20,9 @@ Generates image stacks from single-channel, single–time-point images exported 
 ---
 
 ### 2. `generate_stacks_with_drift_correction.groovy`
-Performs the same operation as above, but also applies **XY drift correction** to compensate for small position shifts across time points.
+Applies **XY drift correction** to compensate for small position shifts across time points.
 
-- **Input:** A multi-channel time-lapse image file.
+- **Input:** A multi-channel time-lapse image file previously generated with the `generate_stacks.groovy` script.
 - **Parameters:**
   - `Channel 1–3`: Choose the channels to include (`Red`, `Green`, `Phase`, or `None`)
   - `Reference`: Select which channel will be used to estimate drift.
@@ -62,8 +62,30 @@ To enable these:
 ## Exporting Data from Incucyte
 
 Correct export settings are essential for proper channel detection and time-lapse reconstruction.
-See the Incucyte Export Guide for detailed instructions on how to export compatible TIFF files, including:
+A quick summary of the key steps is below:
 
-- Recommended file naming conventions
-- Channel and format settings
-- Consistent dimensions and bit depth
+In the **Incucyte Experiment Viewer**:
+
+1. Click the **“Export images and movies”** icon.  
+2. Under **Export Type**, select **“As Stored”**.  
+3. Choose the **image type** (only one channel at a time):
+   - **Phase:** only one option (8-bit)
+   - **Red** and **Green:** choose **Uncalibrated (16-bit)** instead of calibrated  
+4. Select the desired **scan times**, **wells**, and **fields of view** to export.  
+5. Use a **file name prefix** corresponding to the channel:
+   - `Phase`, `Red`, or `Green`
+   - Example output for Phase:  
+     ```
+     Phase_B3_1_00d00h00m.tif
+     ```
+     These filenames are required by the scripts to correctly detect channels and time points.  
+6. Save the files as **TIFF (.tif)**.  
+7. Organize the exported files in the following folder structure:
+- Images/
+  - Raw/
+    - Phase/
+    - Green/
+    - Red/
+
+The `generate_stacks.groovy` script should be run using the `Raw` folder as input.  
+All generated image stacks will be saved inside a new generated `Stacks` folder.
