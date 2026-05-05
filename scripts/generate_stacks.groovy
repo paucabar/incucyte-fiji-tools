@@ -67,17 +67,17 @@ if (phaseFiles.isEmpty()) {
     return
 }
 
-// Group by Key (FOV)
-def keyPattern = ~/Phase_([A-Z]\d+_\d+)_\d{2}d\d{2}h\d{2}m/
+// Group by vessel + FOV key (e.g. VID9955_B2_1)
+def keyPattern = ~/(VID\d+)_Phase_([A-Z]\d{1,2}_\d+)(_\d{2}d\d{2}h\d{2}m)/
 def grouped = [:].withDefault { [] }
 
 phaseFiles.each { f ->
     def m = f.name =~ keyPattern
-    if (m.find()) grouped[m.group(1)] << f
+    if (m.find()) grouped["${m.group(1)}_${m.group(2)}"] << f
 }
 
 if (grouped.isEmpty()) {
-    println("No valid Phase file names matched expected pattern.")
+    println("No valid Phase file names matched expected pattern (expected: VID9955_Phase_B2_1_00d00h00m.tif).")
     return
 }
 
@@ -95,13 +95,17 @@ grouped.each { key, files ->
     def dimsSet = false
 
     files.each { phaseFile ->
-        def suffix = phaseFile.name.replaceFirst(/Phase_${key}/, "")
+        def fm = (phaseFile.name =~ keyPattern)
+        fm.find()
+        def vid    = fm.group(1)
+        def wellFov = fm.group(2)
+        def ts     = fm.group(3)  // e.g. _00d00h00m
         def images = []
 
         availableChannels.eachWithIndex { ch, idx ->
-            def chFile = new File(new File(inputFolder, ch), "${ch}_${key}${suffix}")
+            def chFile = new File(new File(inputFolder, ch), "${vid}_${ch}_${wellFov}${ts}.tif")
             if (!chFile.exists()) {
-                println("Missing ${ch} file for $key$suffix")
+                println("Missing ${ch} file for ${vid}_${wellFov}${ts}")
                 return
             }
             def imp = IJ.openImage(chFile.absolutePath)
@@ -148,7 +152,7 @@ grouped.each { key, files ->
     cal.frameInterval = timeInterval
     cal.setTimeUnit("minute")
 
-    def outName = isTimelapse ? "Timelapse_${key}.tif" : "${key}.tif"
+    def outName = "${key}.tif"
     def outFile = new File(outputFolder, outName)
     new FileSaver(coloredStack).saveAsTiff(outFile.absolutePath)
     println("Saved: " + outFile.absolutePath)

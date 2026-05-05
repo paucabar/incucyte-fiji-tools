@@ -7,15 +7,15 @@ This repository contains [Fiji (ImageJ)](https://fiji.sc) Groovy scripts designe
 ## Overview
 
 ### 1. `generate_stacks.groovy`
-Generates image stacks from single-channel, single–time-point images exported by the Incucyte software.
+Generates image stacks from single-channel, single–time-point images exported by the Incucyte software. Works with single- and multi-plate experiments in the same input folder.
 
-- **Input:** Directory containing exported images.
+- **Input:** `Raw/` directory containing `Phase/`, `Green/`, and/or `Red/` subfolders.
 - **Parameters:**
   - `Time interval (minutes)`: Set the time interval between frames in minutes.
 - **Automatic detection:** The script automatically detects:
-  - The available **channels** (e.g. Phase, Green, Red)
-  - Whether the data correspond to a **time-lapse** or **single-time-point** acquisition.
-- **Output:** Multidimensional image stacks corresponding to each field of view.
+  - The vessel ID (e.g. `VID9955`) from the exported filenames.
+  - The available **channels** (e.g. Phase, Green, Red).
+- **Output:** One multidimensional image stack per (vessel, well, FOV), named `VID9955_B3_1.tif`.
 
 ---
 
@@ -72,13 +72,11 @@ In the **Incucyte Experiment Viewer**:
    - **Phase:** only one option (8-bit)
    - **Red** and **Green:** choose **Uncalibrated (16-bit)** instead of calibrated  
 4. Select the desired **scan times**, **wells**, and **fields of view** to export.  
-5. Use a **file name prefix** corresponding to the channel:
-   - `Phase`, `Red`, or `Green`
-   - Example output for Phase:  
-     ```
-     Phase_B3_1_00d00h00m.tif
-     ```
-     These filenames are required by the scripts to correctly detect channels and time points.  
+5. The exported filenames must follow the Incucyte standard format, which includes the vessel ID automatically:
+   ```
+   VID9955_Phase_B3_1_00d00h00m.tif
+   ```
+   If your Incucyte version requires a manual prefix, set it to the channel name only (`Phase`, `Red`, or `Green`) — the vessel ID will be prepended automatically by the software.  
 6. Save the files as **TIFF (.tif)**.  
 7. Organize the exported files in the following folder structure:
 - Images/
